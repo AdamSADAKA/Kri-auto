@@ -42,38 +42,6 @@ data = worksheet.get_all_values()[1:]
 new_column_names = ["client", "canal", "ville", "aéroport", "date réservation", "date début", "date fin", "matricule", "modèle", "tarif", "km début", "km fin", "commentaire"]
 df = pd.DataFrame(data, columns=new_column_names)
 
-# Filter the DataFrame
-df_filtered = df[df['client'] != '']
-
-# Update date columns using .loc to avoid SettingWithCopyWarning
-df_filtered.loc[:, 'date début'] = pd.to_datetime(df_filtered['date début'], format='%d/%m/%Y', errors='coerce')
-df_filtered.loc[:, 'date fin'] = pd.to_datetime(df_filtered['date fin'], format='%d/%m/%Y', errors='coerce')
-
-
-# Initialize an empty list to store transformed data
-transformed_data = []
-
-# Iterate over the rows in the original DataFrame
-for _, row in df_filtered.iterrows():
-    # Calculate the date range between "date début" and "date fin"
-    date_range = pd.date_range(start=row['date début'], end=row['date fin'] - timedelta(days=1))
-
-    # Create a new DataFrame for each day in the date range
-    for date in date_range:
-        transformed_row = row.copy()
-        transformed_row['date'] = date
-        transformed_data.append(transformed_row)
-
-# Create a new DataFrame from the transformed data
-transformed_df = pd.DataFrame(transformed_data)
-
-# Drop the original "date début" and "date fin" columns
-transformed_df.drop(['date début', 'date fin'], axis=1, inplace=True)
-
-# Reset the index
-transformed_df.reset_index(drop=True, inplace=True)
-transformed_df['date'] = transformed_df['date'].astype(str)
-
 # Define PostgreSQL connection details
 db_config = {
     'user': 'postgres',
@@ -97,7 +65,7 @@ def load_data_to_postgres(dataframe, table_name):
 
 # Define the Prefect flow
 with Flow("Google Sheets to PostgreSQL") as flow:
-    load_data_to_postgres(transformed_df, "sales_data")
+    load_data_to_postgres(df, "sales_data")
 
 # Execute the flow
 if __name__ == "__main__":
