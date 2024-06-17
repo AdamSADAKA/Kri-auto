@@ -42,9 +42,13 @@ data = worksheet.get_all_values()[1:]
 new_column_names = ["client", "canal", "ville", "aéroport", "date réservation", "date début", "date fin", "matricule", "modèle", "tarif", "km début", "km fin", "commentaire"]
 df = pd.DataFrame(data, columns=new_column_names)
 
+# Filter the DataFrame
 df_filtered = df[df['client'] != '']
-df_filtered['date début'] = pd.to_datetime(df_filtered['date début'], format='%d/%m/%Y', errors='coerce')
-df_filtered['date fin'] = pd.to_datetime(df_filtered['date fin'], format='%d/%m/%Y', errors='coerce')
+
+# Update date columns using .loc to avoid SettingWithCopyWarning
+df_filtered.loc[:, 'date début'] = pd.to_datetime(df_filtered['date début'], format='%d/%m/%Y', errors='coerce')
+df_filtered.loc[:, 'date fin'] = pd.to_datetime(df_filtered['date fin'], format='%d/%m/%Y', errors='coerce')
+
 
 # Initialize an empty list to store transformed data
 transformed_data = []
