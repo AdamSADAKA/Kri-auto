@@ -64,10 +64,7 @@ def load_data_to_postgres(dataframe, table_name):
     print(f"Data loaded to table {table_name}")
 
 # Define the Prefect flow
-with Flow("Google Sheets to PostgreSQL") as flow:
+@flow
+def load_data():
     load_data_to_postgres(df, "sales_data")
-
-# Execute the flow
-if __name__ == "__main__":
-    flow.run()
 
